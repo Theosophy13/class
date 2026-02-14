@@ -1,1 +1,632 @@
-hello
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Student Management System</title>
+  <style>
+    :root {
+      --bg: #f4f7fb;
+      --card: #ffffff;
+      --primary: #3f51b5;
+      --accent: #00b894;
+      --danger: #e53935;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --border: #dbe2ef;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 250px 1fr;
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      background: #1f2a44;
+      color: #f8fafc;
+      padding: 1.25rem;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+    }
+
+    .brand {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 1.25rem;
+      line-height: 1.4;
+    }
+
+    .nav-btn {
+      width: 100%;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      background: transparent;
+      color: #fff;
+      text-align: left;
+      padding: 0.7rem 0.8rem;
+      border-radius: 0.55rem;
+      margin-bottom: 0.55rem;
+      cursor: pointer;
+    }
+
+    .nav-btn.active,
+    .nav-btn:hover {
+      background: rgba(255, 255, 255, 0.18);
+    }
+
+    main {
+      padding: 1.25rem;
+    }
+
+    .page {
+      display: none;
+    }
+
+    .page.active {
+      display: block;
+    }
+
+    h1 {
+      margin-bottom: 1rem;
+      font-size: 1.6rem;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 0.8rem;
+      padding: 1rem;
+      box-shadow: 0 4px 16px rgba(31, 42, 68, 0.06);
+    }
+
+    .metric {
+      font-size: 1.7rem;
+      font-weight: 700;
+      margin-top: 0.35rem;
+      color: var(--primary);
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 0.8rem;
+      margin-bottom: 1rem;
+    }
+
+    input,
+    select,
+    button,
+    textarea {
+      padding: 0.65rem 0.75rem;
+      border-radius: 0.5rem;
+      border: 1px solid var(--border);
+      font-size: 0.95rem;
+    }
+
+    button.primary {
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      cursor: pointer;
+    }
+
+    button.primary:hover {
+      opacity: 0.95;
+    }
+
+    button.success {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      cursor: pointer;
+    }
+
+    button.danger {
+      background: var(--danger);
+      color: #fff;
+      border: none;
+      cursor: pointer;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #fff;
+      border-radius: 0.8rem;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+
+    th,
+    td {
+      padding: 0.7rem;
+      border-bottom: 1px solid var(--border);
+      text-align: left;
+      font-size: 0.92rem;
+      vertical-align: middle;
+    }
+
+    th {
+      background: #f8f9fd;
+      font-weight: 600;
+    }
+
+    tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .muted {
+      color: var(--muted);
+      font-size: 0.9rem;
+      margin-top: 0.5rem;
+    }
+
+    .avatar {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid #eef1f8;
+      background: #eef1f8;
+    }
+
+    .inline-actions {
+      display: flex;
+      gap: 0.45rem;
+      flex-wrap: wrap;
+    }
+
+    .chart {
+      margin-top: 0.8rem;
+      height: 14px;
+      border-radius: 999px;
+      background: #e6ebf5;
+      overflow: hidden;
+    }
+
+    .chart > span {
+      display: block;
+      height: 100%;
+      background: linear-gradient(90deg, #3f51b5, #5c6bc0);
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+      margin-bottom: 0.8rem;
+    }
+
+    @media (max-width: 880px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        height: auto;
+        position: static;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="brand">🎓 Student Management System</div>
+      <button class="nav-btn active" data-page="dashboard">Dashboard</button>
+      <button class="nav-btn" data-page="add">Add Student</button>
+      <button class="nav-btn" data-page="students">Student List</button>
+      <button class="nav-btn" data-page="attendance">Attendance</button>
+      <button class="nav-btn" data-page="marks">Marks</button>
+      <button class="nav-btn" data-page="reports">Reports</button>
+    </aside>
+
+    <main>
+      <section class="page active" id="dashboard">
+        <h1>Dashboard</h1>
+        <div class="stats">
+          <div class="card">
+            <div>Total Students</div>
+            <div class="metric" id="totalStudents">0</div>
+          </div>
+          <div class="card">
+            <div>Avg Attendance</div>
+            <div class="metric" id="avgAttendance">0%</div>
+          </div>
+          <div class="card">
+            <div>Avg Marks</div>
+            <div class="metric" id="avgMarks">0</div>
+          </div>
+        </div>
+        <div class="card">
+          <h3>Performance Overview</h3>
+          <p class="muted" id="performanceLabel">No data available yet.</p>
+          <div class="chart"><span id="performanceBar" style="width: 0%"></span></div>
+        </div>
+      </section>
+
+      <section class="page" id="add">
+        <h1>Add / Edit Student</h1>
+        <div class="card">
+          <form id="studentForm">
+            <input type="hidden" id="studentId" />
+            <div class="form-grid">
+              <input id="name" placeholder="Student Name" required />
+              <input id="email" type="email" placeholder="Email" required />
+              <input id="department" placeholder="Department" required />
+              <input id="year" type="number" min="1" max="8" placeholder="Year" required />
+              <input id="attendanceValue" type="number" min="0" max="100" placeholder="Attendance %" required />
+              <input id="marksValue" type="number" min="0" max="100" placeholder="Marks" required />
+              <input id="photoUrl" placeholder="Photo URL (optional)" />
+            </div>
+            <div class="inline-actions">
+              <button class="primary" type="submit">Save Student</button>
+              <button class="success" type="button" id="resetForm">Reset</button>
+            </div>
+          </form>
+          <p class="muted">Tip: Use placeholder images like https://i.pravatar.cc/100?img=3</p>
+        </div>
+      </section>
+
+      <section class="page" id="students">
+        <h1>Student List</h1>
+        <div class="toolbar">
+          <input id="searchStudent" placeholder="Search by name / department" />
+          <select id="filterYear">
+            <option value="">All Years</option>
+            <option value="1">Year 1</option>
+            <option value="2">Year 2</option>
+            <option value="3">Year 3</option>
+            <option value="4">Year 4</option>
+          </select>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Photo</th>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Department</th>
+              <th>Year</th>
+              <th>Attendance</th>
+              <th>Marks</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="studentTableBody"></tbody>
+        </table>
+      </section>
+
+      <section class="page" id="attendance">
+        <h1>Attendance</h1>
+        <div class="card">
+          <p class="muted">Update attendance quickly for each student.</p>
+          <table>
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Department</th>
+                <th>Attendance %</th>
+                <th>Update</th>
+              </tr>
+            </thead>
+            <tbody id="attendanceBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="page" id="marks">
+        <h1>Marks</h1>
+        <div class="card">
+          <p class="muted">Track and update marks out of 100.</p>
+          <table>
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Department</th>
+                <th>Marks</th>
+                <th>Update</th>
+              </tr>
+            </thead>
+            <tbody id="marksBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="page" id="reports">
+        <h1>Reports</h1>
+        <div class="card">
+          <div class="toolbar">
+            <button class="primary" id="exportJson">Export JSON</button>
+            <button class="success" id="exportCsv">Export CSV</button>
+          </div>
+          <p class="muted">Download student data for records/report sharing.</p>
+          <pre id="reportPreview" style="margin-top: 0.8rem; max-height: 280px; overflow: auto;"></pre>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const STORAGE_KEY = "sms_students_v1";
+    const fallbackAvatar = "https://via.placeholder.com/38x38?text=S";
+
+    const navButtons = document.querySelectorAll(".nav-btn");
+    const pages = document.querySelectorAll(".page");
+
+    const studentForm = document.getElementById("studentForm");
+    const studentIdField = document.getElementById("studentId");
+    const nameField = document.getElementById("name");
+    const emailField = document.getElementById("email");
+    const departmentField = document.getElementById("department");
+    const yearField = document.getElementById("year");
+    const attendanceField = document.getElementById("attendanceValue");
+    const marksField = document.getElementById("marksValue");
+    const photoField = document.getElementById("photoUrl");
+
+    const studentTableBody = document.getElementById("studentTableBody");
+    const attendanceBody = document.getElementById("attendanceBody");
+    const marksBody = document.getElementById("marksBody");
+    const searchField = document.getElementById("searchStudent");
+    const filterYearField = document.getElementById("filterYear");
+
+    const totalStudentsEl = document.getElementById("totalStudents");
+    const avgAttendanceEl = document.getElementById("avgAttendance");
+    const avgMarksEl = document.getElementById("avgMarks");
+    const performanceLabel = document.getElementById("performanceLabel");
+    const performanceBar = document.getElementById("performanceBar");
+
+    const reportPreview = document.getElementById("reportPreview");
+
+    function readStudents() {
+      try {
+        return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+      } catch (e) {
+        return [];
+      }
+    }
+
+    function saveStudents(students) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(students));
+    }
+
+    function switchPage(pageId) {
+      pages.forEach((page) => page.classList.toggle("active", page.id === pageId));
+      navButtons.forEach((btn) => btn.classList.toggle("active", btn.dataset.page === pageId));
+    }
+
+    navButtons.forEach((btn) => {
+      btn.addEventListener("click", () => switchPage(btn.dataset.page));
+    });
+
+    function resetForm() {
+      studentIdField.value = "";
+      studentForm.reset();
+    }
+
+    function seedIfEmpty() {
+      const current = readStudents();
+      if (current.length) return;
+      saveStudents([
+        {
+          id: crypto.randomUUID(),
+          name: "Aarav Sharma",
+          email: "aarav@example.com",
+          department: "Computer Science",
+          year: 3,
+          attendance: 89,
+          marks: 84,
+          photo: "https://i.pravatar.cc/100?img=12"
+        },
+        {
+          id: crypto.randomUUID(),
+          name: "Meera Iyer",
+          email: "meera@example.com",
+          department: "Electronics",
+          year: 2,
+          attendance: 93,
+          marks: 91,
+          photo: "https://i.pravatar.cc/100?img=24"
+        }
+      ]);
+    }
+
+    function renderDashboard(students) {
+      const total = students.length;
+      const avgAttendance = total ? (students.reduce((sum, s) => sum + Number(s.attendance), 0) / total).toFixed(1) : 0;
+      const avgMarks = total ? (students.reduce((sum, s) => sum + Number(s.marks), 0) / total).toFixed(1) : 0;
+      totalStudentsEl.textContent = total;
+      avgAttendanceEl.textContent = `${avgAttendance}%`;
+      avgMarksEl.textContent = avgMarks;
+
+      const score = total ? ((Number(avgAttendance) + Number(avgMarks)) / 2).toFixed(1) : 0;
+      performanceBar.style.width = `${Math.min(100, score)}%`;
+      performanceLabel.textContent = total
+        ? `Overall performance score is ${score}/100 based on attendance and marks.`
+        : "No data available yet.";
+    }
+
+    function filteredStudents(students) {
+      const q = searchField.value.trim().toLowerCase();
+      const y = filterYearField.value;
+      return students.filter((s) => {
+        const textMatch = !q || s.name.toLowerCase().includes(q) || s.department.toLowerCase().includes(q);
+        const yearMatch = !y || String(s.year) === y;
+        return textMatch && yearMatch;
+      });
+    }
+
+    function renderStudents(students) {
+      const rows = filteredStudents(students).map((s) => `
+        <tr>
+          <td><img class="avatar" src="${s.photo || fallbackAvatar}" alt="${s.name}" onerror="this.src='${fallbackAvatar}'"></td>
+          <td>${s.name}</td>
+          <td>${s.email}</td>
+          <td>${s.department}</td>
+          <td>${s.year}</td>
+          <td>${s.attendance}%</td>
+          <td>${s.marks}</td>
+          <td>
+            <div class="inline-actions">
+              <button class="success" onclick="editStudent('${s.id}')">Edit</button>
+              <button class="danger" onclick="deleteStudent('${s.id}')">Delete</button>
+            </div>
+          </td>
+        </tr>`).join("");
+      studentTableBody.innerHTML = rows || `<tr><td colspan="8">No students found.</td></tr>`;
+    }
+
+    function renderAttendance(students) {
+      attendanceBody.innerHTML = students.map((s) => `
+        <tr>
+          <td>${s.name}</td>
+          <td>${s.department}</td>
+          <td><input type="number" min="0" max="100" value="${s.attendance}" id="attendance-${s.id}"/></td>
+          <td><button class="primary" onclick="updateAttendance('${s.id}')">Save</button></td>
+        </tr>`).join("");
+    }
+
+    function renderMarks(students) {
+      marksBody.innerHTML = students.map((s) => `
+        <tr>
+          <td>${s.name}</td>
+          <td>${s.department}</td>
+          <td><input type="number" min="0" max="100" value="${s.marks}" id="marks-${s.id}"/></td>
+          <td><button class="primary" onclick="updateMarks('${s.id}')">Save</button></td>
+        </tr>`).join("");
+    }
+
+    function renderReports(students) {
+      reportPreview.textContent = JSON.stringify(students, null, 2);
+    }
+
+    function renderAll() {
+      const students = readStudents();
+      renderDashboard(students);
+      renderStudents(students);
+      renderAttendance(students);
+      renderMarks(students);
+      renderReports(students);
+    }
+
+    studentForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const students = readStudents();
+      const payload = {
+        id: studentIdField.value || crypto.randomUUID(),
+        name: nameField.value.trim(),
+        email: emailField.value.trim(),
+        department: departmentField.value.trim(),
+        year: Number(yearField.value),
+        attendance: Number(attendanceField.value),
+        marks: Number(marksField.value),
+        photo: photoField.value.trim()
+      };
+
+      const index = students.findIndex((s) => s.id === payload.id);
+      if (index >= 0) students[index] = payload;
+      else students.push(payload);
+
+      saveStudents(students);
+      resetForm();
+      switchPage("students");
+      renderAll();
+    });
+
+    searchField.addEventListener("input", renderAll);
+    filterYearField.addEventListener("change", renderAll);
+    document.getElementById("resetForm").addEventListener("click", resetForm);
+
+    window.editStudent = function (id) {
+      const student = readStudents().find((s) => s.id === id);
+      if (!student) return;
+      studentIdField.value = student.id;
+      nameField.value = student.name;
+      emailField.value = student.email;
+      departmentField.value = student.department;
+      yearField.value = student.year;
+      attendanceField.value = student.attendance;
+      marksField.value = student.marks;
+      photoField.value = student.photo;
+      switchPage("add");
+    };
+
+    window.deleteStudent = function (id) {
+      const students = readStudents().filter((s) => s.id !== id);
+      saveStudents(students);
+      renderAll();
+    };
+
+    window.updateAttendance = function (id) {
+      const input = document.getElementById(`attendance-${id}`);
+      const value = Math.min(100, Math.max(0, Number(input.value)));
+      const students = readStudents();
+      const student = students.find((s) => s.id === id);
+      if (!student) return;
+      student.attendance = value;
+      saveStudents(students);
+      renderAll();
+    };
+
+    window.updateMarks = function (id) {
+      const input = document.getElementById(`marks-${id}`);
+      const value = Math.min(100, Math.max(0, Number(input.value)));
+      const students = readStudents();
+      const student = students.find((s) => s.id === id);
+      if (!student) return;
+      student.marks = value;
+      saveStudents(students);
+      renderAll();
+    };
+
+    function downloadFile(filename, content, type) {
+      const blob = new Blob([content], { type });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    document.getElementById("exportJson").addEventListener("click", () => {
+      const students = readStudents();
+      downloadFile("students.json", JSON.stringify(students, null, 2), "application/json");
+    });
+
+    document.getElementById("exportCsv").addEventListener("click", () => {
+      const students = readStudents();
+      const headers = ["id", "name", "email", "department", "year", "attendance", "marks", "photo"];
+      const csvRows = [headers.join(",")];
+      students.forEach((s) => {
+        csvRows.push(headers.map((h) => `"${String(s[h] ?? "").replaceAll('"', '""')}"`).join(","));
+      });
+      downloadFile("students.csv", csvRows.join("\n"), "text/csv;charset=utf-8;");
+    });
+
+    seedIfEmpty();
+    renderAll();
+  </script>
+</body>
+</html>
